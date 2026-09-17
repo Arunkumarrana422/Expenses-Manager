@@ -101,13 +101,44 @@ fun DashboardScreen(
     if (rooms.isEmpty()) {
         Scaffold { padding ->
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                EmptyStateView(
-                    title = "No Rooms Found",
-                    message = "Create a new shared room or join using a 6-character room code to start managing expenses.",
-                    icon = Icons.Default.MeetingRoom,
-                    actionButtonText = "+ Create or Join Room",
-                    onActionClick = { navController.navigate(Screen.CreateRoom.route) }
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MeetingRoom,
+                        contentDescription = null,
+                        modifier = Modifier.height(72.dp).width(72.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "No Rooms Found",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Create a new shared room or join using a 6-character room code.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    OutlinedButton(
+                        onClick = { navController.navigate(Screen.JoinRoom.route) },
+                        modifier = Modifier.fillMaxWidth(0.7f)
+                    ) {
+                        Text("Join Room with Code")
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    androidx.compose.material3.Button(
+                        onClick = { navController.navigate(Screen.CreateRoom.route) },
+                        modifier = Modifier.fillMaxWidth(0.7f)
+                    ) {
+                        Text("Create New Room")
+                    }
+                }
             }
         }
         return
