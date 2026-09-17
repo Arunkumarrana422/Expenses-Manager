@@ -3,6 +3,7 @@ package com.example.expensemanager.ui.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -44,6 +45,24 @@ fun NavGraph(
     val authState by authViewModel.uiState.collectAsState()
     val currentRoom by roomViewModel.currentRoom.collectAsState()
     val members by roomViewModel.members.collectAsState()
+
+    // Auto-redirect to Login when user logs out
+    LaunchedEffect(authState) {
+        if (authState is AuthUiState.Unauthenticated) {
+            val route = navController.currentBackStackEntry?.destination?.route
+            if (route != null &&
+                route != Screen.Login.route &&
+                route != Screen.SignUp.route &&
+                route != Screen.Splash.route &&
+                route != Screen.ForgotPassword.route
+            ) {
+                navController.navigate(Screen.Login.route) {
+                    popUpTo(navController.graph.id) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+        }
+    }
 
     val showBottomBar = currentRoute in Screen.bottomNavItems.map { it.route }
 
@@ -183,7 +202,8 @@ fun NavGraph(
                     roomViewModel = roomViewModel,
                     onLogout = {
                         navController.navigate(Screen.Login.route) {
-                            popUpTo(0) { inclusive = true }
+                            popUpTo(navController.graph.id) { inclusive = true }
+                            launchSingleTop = true
                         }
                     }
                 )
