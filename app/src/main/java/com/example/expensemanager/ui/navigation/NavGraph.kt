@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -45,18 +46,28 @@ fun NavGraph(
     val authState by authViewModel.uiState.collectAsState()
     val currentRoom by roomViewModel.currentRoom.collectAsState()
 
-    // Auto-redirect to Login when user logs out
+    // Handle logout → redirect to Login
     LaunchedEffect(authState) {
         if (authState is AuthUiState.Unauthenticated) {
-            if (currentRoute != null &&
-                currentRoute != Screen.Login.route &&
-                currentRoute != Screen.SignUp.route &&
-                currentRoute != Screen.Splash.route &&
-                currentRoute != Screen.ForgotPassword.route
-            ) {
-                navController.navigate(Screen.Login.route) {
-                    popUpTo(0) { inclusive = true }
-                    launchSingleTop = true
+            val route = currentRoute
+            val alreadyOnAuthScreen = route == Screen.Login.route ||
+                route == Screen.SignUp.route ||
+                route == Screen.Splash.route ||
+                route == Screen.ForgotPassword.route
+
+            if (!alreadyOnAuthScreen) {
+                try {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                } catch (e: Exception) {
+                    // Fallback: navigate without clearing stack
+                    navController.navigate(Screen.Login.route) {
+                        launchSingleTop = true
+                    }
                 }
             }
         }
@@ -199,7 +210,6 @@ fun NavGraph(
                     authViewModel = authViewModel,
                     roomViewModel = roomViewModel,
                     onLogout = {
-                        // Just call logout — LaunchedEffect will handle navigation
                         authViewModel.logout()
                     }
                 )
