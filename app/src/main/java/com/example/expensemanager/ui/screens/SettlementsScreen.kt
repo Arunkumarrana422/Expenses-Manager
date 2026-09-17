@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,6 +49,11 @@ fun SettlementsScreen(
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Pending Settlements", "Payment History")
 
+    val paidPairs = recordedSettlements.map { it.payerId to it.receiverId }.toSet()
+    val pendingSuggestions = calculation.suggestedSettlements.filter {
+        (it.fromMemberId to it.toMemberId) !in paidPairs
+    }
+
     LaunchedEffect(currentRoom) {
         currentRoom?.let { room ->
             settlementViewModel.observeSettlements(room.roomId)
@@ -87,8 +91,7 @@ fun SettlementsScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         if (selectedTabIndex == 0) {
-            // Pending Settlements
-            if (calculation.suggestedSettlements.isEmpty()) {
+            if (pendingSuggestions.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     EmptyStateView(
                         title = "All Settled Up!",
@@ -100,7 +103,7 @@ fun SettlementsScreen(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(calculation.suggestedSettlements) { transaction ->
+                    items(pendingSuggestions) { transaction ->
                         SettlementCard(
                             transaction = transaction,
                             isPaid = false,
@@ -114,7 +117,6 @@ fun SettlementsScreen(
                 }
             }
         } else {
-            // History of paid settlements
             if (recordedSettlements.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     EmptyStateView(
