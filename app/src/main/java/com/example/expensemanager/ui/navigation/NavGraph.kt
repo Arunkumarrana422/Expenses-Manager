@@ -44,20 +44,18 @@ fun NavGraph(
 
     val authState by authViewModel.uiState.collectAsState()
     val currentRoom by roomViewModel.currentRoom.collectAsState()
-    val members by roomViewModel.members.collectAsState()
 
     // Auto-redirect to Login when user logs out
     LaunchedEffect(authState) {
         if (authState is AuthUiState.Unauthenticated) {
-            val route = navController.currentBackStackEntry?.destination?.route
-            if (route != null &&
-                route != Screen.Login.route &&
-                route != Screen.SignUp.route &&
-                route != Screen.Splash.route &&
-                route != Screen.ForgotPassword.route
+            if (currentRoute != null &&
+                currentRoute != Screen.Login.route &&
+                currentRoute != Screen.SignUp.route &&
+                currentRoute != Screen.Splash.route &&
+                currentRoute != Screen.ForgotPassword.route
             ) {
                 navController.navigate(Screen.Login.route) {
-                    popUpTo(navController.graph.id) { inclusive = true }
+                    popUpTo(0) { inclusive = true }
                     launchSingleTop = true
                 }
             }
@@ -201,10 +199,8 @@ fun NavGraph(
                     authViewModel = authViewModel,
                     roomViewModel = roomViewModel,
                     onLogout = {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(navController.graph.id) { inclusive = true }
-                            launchSingleTop = true
-                        }
+                        // Just call logout — LaunchedEffect will handle navigation
+                        authViewModel.logout()
                     }
                 )
             }
