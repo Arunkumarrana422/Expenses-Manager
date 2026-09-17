@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "52643587669",
+    "firebase_url": "https://student-patnar-default-rtdb.firebaseio.com",
+    "project_id": "student-patnar",
+    "storage_bucket": "student-patnar.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52643587669:android:4f678e9d91e18a001a96dc",
+        "android_client_info": {
+          "package_name": "Com.my.studantpatnar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "52643587669-cq8stjd8g4vrqj2tq9qjb2n668bkng41.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9JFTO-kzwvccCvydATL-gqGgaqxo33wA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "52643587669-cq8stjd8g4vrqj2tq9qjb2n668bkng41.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52643587669:android:d2785394bf4b2f4d1a96dc",
+        "android_client_info": {
+          "package_name": "com.example.expensemanager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "52643587669-cq8stjd8g4vrqj2tq9qjb2n668bkng41.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9JFTO-kzwvccCvydATL-gqGgaqxo33wA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "52643587669-cq8stjd8g4vrqj2tq9qjb2n668bkng41.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
