@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -15,9 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensemanager.ui.navigation.AuthNavGraph
 import com.example.expensemanager.ui.navigation.NavGraph
@@ -47,27 +48,34 @@ fun AppRoot() {
     val authViewModel: AuthViewModel = viewModel()
     val authState by authViewModel.uiState.collectAsState()
 
-    when (authState) {
-        is AuthUiState.Authenticated -> {
-            // Logged in — show main app
-            NavGraph(authViewModel = authViewModel)
+    // Splash only for first ~1 second of app launch
+    var splashDone by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(1000)
+        splashDone = true
+    }
+
+    // Track only stable (definitive) states — ignore Loading/Idle
+    // This prevents splash from showing during login
+    var stableState by remember { mutableStateOf<AuthUiState>(AuthUiState.Idle) }
+    LaunchedEffect(authState) {
+        when (authState) {
+            is AuthUiState.Authenticated -> stableState = authState
+            is AuthUiState.Unauthenticated -> stableState = authState
+            else -> { /* keep previous stable state */ }
         }
-        is AuthUiState.Unauthenticated, is AuthUiState.Error -> {
-            // Logged out — show login/signup
-            AuthNavGraph(authViewModel = authViewModel)
-        }
-        else -> {
-            // Idle / Loading — show splash
-            SplashContent()
-        }
+    }
+
+    when {
+        !splashDone -> SplashContent()
+        stableState is AuthUiState.Authenticated -> NavGraph(authViewModel = authViewModel)
+        stableState is AuthUiState.Unauthenticated -> AuthNavGraph(authViewModel = authViewModel)
+        else -> SplashContent()
     }
 }
 
 @Composable
 private fun SplashContent() {
-    // Small delay so user sees the splash briefly
-    LaunchedEffect(Unit) { delay(500) }
-
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center

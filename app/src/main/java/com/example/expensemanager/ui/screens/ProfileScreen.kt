@@ -1,5 +1,6 @@
 package com.example.expensemanager.ui.screens
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.expensemanager.viewmodel.AuthUiState
@@ -50,6 +52,7 @@ fun ProfileScreen(
     roomViewModel: RoomViewModel,
     onLogout: () -> Unit
 ) {
+    val context = LocalContext.current
     val authState by authViewModel.uiState.collectAsState()
     val rooms by roomViewModel.rooms.collectAsState()
 
@@ -172,12 +175,15 @@ fun ProfileScreen(
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
             title = { Text("Logout?") },
-            text = { Text("Are you sure you want to logout from this account?") },
+            text = { Text("Are you sure you want to logout?") },
             confirmButton = {
                 TextButton(
                     onClick = {
                         showLogoutDialog = false
+                        // 1) Sign out from Firebase
                         authViewModel.logout()
+                        // 2) Force recreate the activity — guaranteed clean state
+                        (context as? Activity)?.recreate()
                     }
                 ) {
                     Text("Logout", color = MaterialTheme.colorScheme.error)
