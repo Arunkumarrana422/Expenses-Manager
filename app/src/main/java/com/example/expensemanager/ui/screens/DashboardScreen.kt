@@ -58,6 +58,7 @@ import com.example.expensemanager.viewmodel.AuthUiState
 import com.example.expensemanager.viewmodel.AuthViewModel
 import com.example.expensemanager.viewmodel.ExpenseViewModel
 import com.example.expensemanager.viewmodel.RoomViewModel
+import com.example.expensemanager.viewmodel.SettlementViewModel
 import kotlin.math.abs
 
 @Composable
@@ -65,7 +66,8 @@ fun DashboardScreen(
     navController: NavController,
     roomViewModel: RoomViewModel,
     expenseViewModel: ExpenseViewModel,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    settlementViewModel: SettlementViewModel
 ) {
     val authState by authViewModel.uiState.collectAsState()
     val rooms by roomViewModel.rooms.collectAsState()
@@ -73,9 +75,15 @@ fun DashboardScreen(
     val members by roomViewModel.members.collectAsState()
     val calculation by expenseViewModel.calculationResult.collectAsState()
     val allExpenses by expenseViewModel.expenses.collectAsState()
+    val recordedSettlements by settlementViewModel.settlements.collectAsState()
 
     val currentUserId = (authState as? AuthUiState.Authenticated)?.user?.uid ?: ""
     var roomMenuExpanded by remember { mutableStateOf(false) }
+
+    val paidPairs = recordedSettlements.map { it.payerId to it.receiverId }.toSet()
+    val pendingSuggestions = calculation.suggestedSettlements.filter {
+        (it.fromMemberId to it.toMemberId) !in paidPairs
+    }
 
     LaunchedEffect(currentUserId) {
         if (currentUserId.isNotBlank()) {
@@ -86,6 +94,7 @@ fun DashboardScreen(
     LaunchedEffect(currentRoom, members) {
         currentRoom?.let { r ->
             expenseViewModel.observeRoomExpenses(r.roomId, members)
+            settlementViewModel.observeSettlements(r.roomId)
         }
     }
 
@@ -126,7 +135,6 @@ fun DashboardScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Room Selector Bar
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
@@ -183,7 +191,6 @@ fun DashboardScreen(
                         }
                     }
 
-                    // Room Code Chip
                     Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
@@ -200,7 +207,6 @@ fun DashboardScreen(
                 }
             }
 
-            // Summary Dashboard Card
             item {
                 val myShare = calculation.memberShares.firstOrNull { it.memberId == currentUserId }
                 val myPaid = myShare?.totalPaid ?: 0.0
@@ -252,7 +258,6 @@ fun DashboardScreen(
 
                         Spacer(modifier = Modifier.height(18.dp))
 
-                        // 3 Column Metric Row
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -283,9 +288,8 @@ fun DashboardScreen(
                 }
             }
 
-            // Quick Settlement Teaser
             item {
-                if (calculation.suggestedSettlements.isNotEmpty()) {
+                if (pendingSuggestions.isNotEmpty()) {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -301,7 +305,7 @@ fun DashboardScreen(
                             Column {
                                 Text("Settlement Pending", fontWeight = FontWeight.Bold)
                                 Text(
-                                    text = "${calculation.suggestedSettlements.size} payments required to balance",
+                                    text = "${pendingSuggestions.size} payments required to balance",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                 )
@@ -312,7 +316,6 @@ fun DashboardScreen(
                 }
             }
 
-            // Recent Expenses Section
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

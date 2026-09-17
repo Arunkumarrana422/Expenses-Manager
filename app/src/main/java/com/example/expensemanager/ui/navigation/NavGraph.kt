@@ -130,7 +130,8 @@ fun NavGraph(
                     navController = navController,
                     roomViewModel = roomViewModel,
                     expenseViewModel = expenseViewModel,
-                    authViewModel = authViewModel
+                    authViewModel = authViewModel,
+                    settlementViewModel = settlementViewModel
                 )
             }
 
